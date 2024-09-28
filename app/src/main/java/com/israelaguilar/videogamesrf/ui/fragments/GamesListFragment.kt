@@ -45,7 +45,7 @@ class GamesListFragment : Fragment() {
         // Obtenemos la instancia al repositorio
         repository = (requireActivity().application as VideoGamesRFApp).repository
 
-        val call: Call<MutableList<GameDto>> = repository.getGames("cm/games/games_list.php")
+        val call: Call<MutableList<GameDto>> = repository.getGames()
 
         call.enqueue(object: Callback<MutableList<GameDto>>{
             override fun onResponse(
@@ -60,6 +60,12 @@ class GamesListFragment : Fragment() {
                         layoutManager = LinearLayoutManager(requireContext())
                         adapter = GamesAdapter(games){ game ->
                             // Aquí realizamos la acción para ir a ver los detalles del juego
+                            game.id?.let { id ->
+                                requireActivity().supportFragmentManager.beginTransaction()
+                                    .replace(R.id.fragment_container, GameDetailFragment.newInstance(id))
+                                    .addToBackStack(null)
+                                    .commit()
+                            }
 
                         }
                     }

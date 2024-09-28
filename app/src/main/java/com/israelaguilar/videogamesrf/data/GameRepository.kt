@@ -12,10 +12,17 @@ class GameRepository(
 
     private val gamesApi: GamesApi = retrofit.create(GamesApi::class.java)
 
-    fun getGames(url: String?): Call<MutableList<GameDto>> =
+    /*fun getGames(url: String?): Call<MutableList<GameDto>> =
         gamesApi.getGames(url)
 
     fun getGameDetail(id: String?): Call<GameDetailDto> =
-        gamesApi.getGameDetail(id)
+        gamesApi.getGameDetail(id)*/
 
+
+    // Para Apiary
+    // Obtener la lista de juegos
+    fun getGames(): Call<MutableList<GameDto>> = gamesApi.getGames()
+
+    // Obtener detalles de un juego
+    fun getGameDetail(id: String): Call<GameDetailDto> = gamesApi.getGameDetail(id)
 }

@@ -11,7 +11,7 @@ import retrofit2.http.Url
 interface GamesApi {
 
     // Aquí definimos los endpoints
-
+/*
     // cm/games/games_list.php
     @GET
     fun getGames(
@@ -39,5 +39,18 @@ interface GamesApi {
         @Path("name") name: String?
     ): Call<GameDetailDto>
     // Se mandaría a llamar así: getGameTest("21357", "Israel")
+*/
+
+    // Para Apiary
+
+    // Obtener la lista de juegos
+    @GET("games/games_list")
+    fun getGames(): Call<MutableList<GameDto>>
+
+    // Obtener un juego en específico
+    @GET("games/game_detail/{id}")
+    fun getGameDetail(
+        @Path("id") id: String?
+    ): Call<GameDetailDto>
 
 }

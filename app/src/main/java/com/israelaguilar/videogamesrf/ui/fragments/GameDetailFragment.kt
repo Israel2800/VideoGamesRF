@@ -1,32 +1,42 @@
 package com.israelaguilar.videogamesrf.ui.fragments
 
+import android.graphics.text.LineBreaker
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.israelaguilar.videogamesrf.R
+import com.israelaguilar.videogamesrf.application.VideoGamesRFApp
+import com.israelaguilar.videogamesrf.data.GameRepository
+import com.israelaguilar.videogamesrf.data.remote.model.GameDetailDto
+import com.israelaguilar.videogamesrf.data.remote.model.GameDto
+import com.israelaguilar.videogamesrf.databinding.FragmentGameDetailBinding
+import com.israelaguilar.videogamesrf.utils.Constants
+import com.squareup.picasso.Picasso
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val GAME_ID = "game_id"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [GameDetailFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class GameDetailFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private var gameId: String? = null
+
+    private var _binding: FragmentGameDetailBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var repository: GameRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+        arguments?.let { args ->
+            gameId = args.getString(GAME_ID)
+
+            Log.d(Constants.LOGTAG, "Id recibido $gameId")
         }
     }
 
@@ -34,26 +44,59 @@ class GameDetailFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_game_detail, container, false)
+        _binding = FragmentGameDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    // Se manda a llamar ya cuando el fragment es visible en pantalla
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Obteniendo la instancia al repositorio
+        repository = (requireActivity().application as VideoGamesRFApp).repository
+
+        gameId?.let { id ->
+            // Hago la llamada al endpoint para consumir los detalles del juego
+
+            val call: Call<GameDetailDto> = repository.getGameDetail(id)
+
+            call.enqueue(object: Callback<GameDetailDto>{
+                override fun onResponse(p0: Call<GameDetailDto>, response: Response<GameDetailDto>) {
+
+                    binding.pbLoading.visibility = View.GONE
+
+                    // Aquí utilizamos la respuesta exitosa y asignamos los valores a las vistas
+                    binding.tvTitle.text = response.body()?.title
+
+                    /*Glide.with(requireActivity())
+                        .load(response.body()?.image)
+                        .into(binding.ivImage)*/
+
+                    Picasso.get()
+                        .load(response.body()?.image)
+                        .into(binding.ivImage)
+
+                    binding.tvLongDesc.text = response.body()?.longDesc
+
+                    // Para justificar el texto de un textview
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) // Q corresponde a Android 10
+                        binding.tvLongDesc.justificationMode = LineBreaker.JUSTIFICATION_MODE_INTER_WORD
+                }
+
+                override fun onFailure(p0: Call<GameDetailDto>, p1: Throwable) {
+                    // Manejo del error de conexión
+                }
+
+            })
+        }
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment GameDetailFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(gameId: String) =
             GameDetailFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString(GAME_ID, gameId)
                 }
             }
     }
