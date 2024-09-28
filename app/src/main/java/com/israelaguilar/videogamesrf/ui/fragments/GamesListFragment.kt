@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.israelaguilar.videogamesrf.R
 import com.israelaguilar.videogamesrf.application.VideoGamesRFApp
@@ -58,6 +59,10 @@ class GamesListFragment : Fragment() {
                     // Les pasamos los juegos al recycler view y lo instanciamos
                     binding.rvGames.apply {
                         layoutManager = LinearLayoutManager(requireContext())
+
+                        // Con un grid layout
+                        //layoutManager = GridLayoutManager(requireContext(), 4)
+
                         adapter = GamesAdapter(games){ game ->
                             // Aquí realizamos la acción para ir a ver los detalles del juego
                             game.id?.let { id ->
